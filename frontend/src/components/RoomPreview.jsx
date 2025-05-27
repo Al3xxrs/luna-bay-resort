@@ -1,29 +1,27 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
-const rooms = [
-    {
-        name: "Oceanfront Suite",
-        description: "Wake up to endless blue with private balcony views.",
-        price: "$350/night",
-        image: "/images/room-ocean.jpg",
-    },
-    {
-        name: "Garden Villa",
-        description: "Surrounded by lush palms and serene privacy.",
-        price: "$280/night",
-        image: "/images/room-garden.jpg",
-    },
-    {
-        name: "Hillside Bungalow",
-        description: "Charming and elevated, perfect for a quiet escape.",
-        price: "$220/night",
-        image: "/images/room-hillside.jpg",
-    },
-];
-
 export default function RoomPreview() {
+    const [rooms, setRooms] = useState([]);
+
+    useEffect(() => {
+        fetch("http://localhost:5000/api/rooms")
+            .then((res) => res.json())
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    setRooms(data);
+                } else {
+                    console.error("Unexpected response:", data);
+                    setRooms([]);
+                }
+            })
+            .catch((err) => {
+                console.error("Fetch error:", err);
+                setRooms([]);
+            });
+    }, []);
+
     return (
         <section className="bg-gray-50 py-16 px-6 md:px-12">
             <motion.div
@@ -40,18 +38,18 @@ export default function RoomPreview() {
             <div className="max-w-6xl mx-auto grid gap-8 md:grid-cols-3">
                 {rooms.map((room, index) => (
                     <motion.div
-                        key={index}
+                        key={room.id}
                         className="bg-white rounded-2xl shadow-lg overflow-hidden"
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: index * 0.2 }}
                     >
-                        <img src={room.image} alt={room.name} className="h-56 w-full object-cover" />
+                        <img src={room.image_url} alt={room.name} className="h-56 w-full object-cover" />
                         <div className="p-6 text-left">
                             <h3 className="text-2xl font-semibold mb-2">{room.name}</h3>
                             <p className="text-gray-600 mb-4">{room.description}</p>
-                            <span className="block font-medium text-black mb-4">{room.price}</span>
+                            <span className="block font-medium text-black mb-4">${parseFloat(room.price_per_night).toFixed(2)}/night</span>
                             <Link
                                 to="/rooms"
                                 className="inline-block px-4 py-2 bg-black text-white rounded-full text-sm hover:bg-gray-800 transition"
