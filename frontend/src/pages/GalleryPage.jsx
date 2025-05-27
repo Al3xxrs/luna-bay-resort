@@ -27,9 +27,9 @@ export default function GalleryPage() {
                 <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
                 <motion.h1
                     className="relative z-10 text-4xl md:text-5xl font-bold drop-shadow-md"
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1 }}
+                    initial={{ opacity: 0, y: -30, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    transition={{ duration: 1.2, ease: "easeOut" }}
                 >
                     Gallery
                 </motion.h1>
@@ -37,22 +37,34 @@ export default function GalleryPage() {
 
             {/* Gallery Grid */}
             <section className="max-w-7xl mx-auto px-6 py-16">
-                <h2 className="text-2xl font-semibold text-center mb-10">Moments from Luna Bay</h2>
+                <motion.h2
+                    className="text-2xl font-semibold text-center mb-10"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                >
+                    Moments from Luna Bay
+                </motion.h2>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                     {images.map((src, i) => (
                         <motion.div
                             key={i}
-                            className="overflow-hidden rounded-xl shadow-md cursor-pointer"
-                            initial={{ opacity: 0, y: 20 }}
+                            className="relative overflow-hidden rounded-xl shadow-lg group"
+                            initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: i * 0.1 }}
+                            transition={{ duration: 0.6, delay: i * 0.1 }}
                         >
                             <img
                                 src={src}
-                                alt={`Luna Bay ${i + 1}`}
-                                className="w-full h-64 object-cover transform hover:scale-105 transition duration-500"
+                                alt={`Luna Bay Resort view ${i + 1}`}
+                                className="w-full h-64 object-cover transform group-hover:scale-110 transition duration-700 ease-out"
                             />
+                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition duration-500 backdrop-blur-sm flex items-center justify-center">
+                                <p className="text-white font-medium text-lg">View {i + 1}</p>
+                            </div>
                         </motion.div>
                     ))}
                 </div>

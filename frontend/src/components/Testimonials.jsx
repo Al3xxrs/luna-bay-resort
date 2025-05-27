@@ -1,6 +1,10 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { motion } from "framer-motion";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 const testimonials = [
     {
@@ -23,10 +27,16 @@ const testimonials = [
 export default function Testimonials() {
     return (
         <section className="bg-gray-100 py-16 px-6 md:px-12">
-            <div className="max-w-4xl mx-auto text-center mb-12">
+            <motion.div
+                className="max-w-4xl mx-auto text-center mb-12"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+            >
                 <h2 className="text-4xl font-semibold mb-4">Guest Stories</h2>
                 <p className="text-gray-600 text-lg">What our guests are saying</p>
-            </div>
+            </motion.div>
 
             <Swiper
                 modules={[Navigation, Pagination, Autoplay]}
@@ -40,11 +50,17 @@ export default function Testimonials() {
             >
                 {testimonials.map((t, i) => (
                     <SwiperSlide key={i}>
-                        <div className="bg-white p-8 rounded-2xl shadow-md flex flex-col items-center text-center">
+                        <motion.div
+                            className="bg-white p-8 rounded-2xl shadow-md flex flex-col items-center text-center"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                        >
                             <img src={t.image} alt={t.name} className="w-20 h-20 object-cover rounded-full mb-4" />
                             <p className="text-gray-700 italic mb-4">“{t.quote}”</p>
                             <span className="font-medium text-black">{t.name}</span>
-                        </div>
+                        </motion.div>
                     </SwiperSlide>
                 ))}
             </Swiper>
