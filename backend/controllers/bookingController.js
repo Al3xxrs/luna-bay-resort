@@ -1,14 +1,34 @@
 import db from "../db.js";
+import { sendConfirmationEmail } from "../utils/sendEmail.js";
 
 export const createBooking = async (req, res) => {
-    const { room_id, guest_name, guest_email, check_in, check_out, num_guests, special_requests } = req.body;
     try {
-        const [result] = await db.query(
-            "INSERT INTO bookings (room_id, guest_name, guest_email, check_in, check_out, num_guests, special_requests) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [room_id, guest_name, guest_email, check_in, check_out, num_guests, special_requests]
+        const { fullName, email, phone, roomId, checkIn, checkOut, guests, totalPrice, roomName } = req.body;
+
+        // Insert guest
+        const [guestResult] = await db.query("INSERT INTO guests (name, email, phone) VALUES (?, ?, ?)", [fullName, email, phone]);
+
+        const guestId = guestResult.insertId;
+
+        // Insert booking
+        await db.query(
+            `INSERT INTO bookings 
+             (guest_id, room_id, check_in, check_out, num_guests, total_price)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [guestId, roomId, checkIn, checkOut, guests, totalPrice]
         );
-        res.status(201).json({ id: result.insertId, message: "Booking created successfully" });
-    } catch (error) {
+
+        await sendConfirmationEmail(email, fullName, {
+            roomName, // ✅ use roomName from req.body
+            checkIn,
+            checkOut,
+            guests,
+            totalPrice,
+        });
+
+        res.status(201).json({ message: "Booking created successfully" });
+    } catch (err) {
+        console.error("Booking error:", err.message);
         res.status(500).json({ error: "Failed to create booking" });
     }
 };

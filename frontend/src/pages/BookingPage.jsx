@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaTimes } from "react-icons/fa";
+import axios from "axios";
 
 const rooms = [
     {
@@ -47,10 +48,34 @@ export default function BookingPage() {
         setGuests(1);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert("Booking request submitted!");
-        closeModal();
+
+        try {
+            const nights = (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24);
+            const pricePerNight = selectedRoom ? parseInt(selectedRoom.price.replace(/[^0-9]/g, ""), 10) : 0;
+            const total = pricePerNight * nights * guests;
+
+            const bookingData = {
+                fullName: e.target[0].value,
+                email: e.target[1].value,
+                phone: e.target[2].value,
+                roomId: rooms.findIndex((r) => r.name === selectedRoom.name) + 1,
+                roomName: selectedRoom.name, // ✅ Add this line
+                checkIn,
+                checkOut,
+                guests,
+                totalPrice: total,
+            };
+
+            await axios.post("/api/bookings", bookingData);
+
+            alert("Booking successfully submitted!");
+            closeModal();
+        } catch (err) {
+            console.error(err);
+            alert("Something went wrong. Please try again.");
+        }
     };
 
     return (
@@ -129,6 +154,7 @@ export default function BookingPage() {
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <input type="text" required placeholder="Full Name" className="border rounded-md p-3 w-full" />
                                     <input type="email" required placeholder="Email Address" className="border rounded-md p-3 w-full" />
+                                    <input type="tel" required placeholder="Phone Number" className="border rounded-md p-3 w-full" />
                                     <input
                                         type="date"
                                         required
