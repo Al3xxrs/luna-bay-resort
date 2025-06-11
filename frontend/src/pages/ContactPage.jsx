@@ -1,38 +1,81 @@
-import React from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { motion } from "framer-motion";
+import axios from "axios";
+import { useState } from "react";
+
+// Extract motion components to avoid eslint unused vars error
+const { main: MotionMain, section: MotionSection, h1: MotionH1, div: MotionDiv, form: MotionForm } = motion;
+
+// Animation variants
+const fadeInDown = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 1 } },
+};
+
+const slideInLeft = {
+    hidden: { opacity: 0, x: -30 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.6 } },
+};
+
+const slideInRight = {
+    hidden: { opacity: 0, x: 30 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.6, delay: 0.2 } },
+};
+
+const inputStyles = "w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black";
 
 export default function ContactPage() {
+    const [statusMessage, setStatusMessage] = useState(null);
+    const [statusType, setStatusType] = useState(null);
+
+    // Form submit handler
+    async function handleSubmit(e) {
+        e.preventDefault();
+        setStatusMessage(null);
+
+        const formData = new FormData(e.target);
+        const name = formData.get("name");
+        const email = formData.get("email");
+        const message = formData.get("message");
+
+        try {
+            const response = await axios.post("/api/contact", { name, email, message });
+            if (response.status === 200) {
+                setStatusMessage("Message sent successfully!");
+                setStatusType("success");
+                e.target.reset();
+            } else {
+                setStatusMessage("Failed to send message. Please try again.");
+                setStatusType("error");
+            }
+        } catch (error) {
+            console.error("Contact form error:", error);
+            setStatusMessage("Something went wrong. Please try again later.");
+            setStatusType("error");
+        }
+    }
+
     return (
-        <main className="bg-white text-gray-800">
+        <MotionMain className="bg-white text-gray-800" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
             <Navbar />
 
             {/* Hero */}
-            <section
+            <MotionSection
                 className="h-[50vh] bg-cover bg-center relative flex items-center justify-center text-white"
                 style={{ backgroundImage: "url('/images/contact-hero.jpg')" }}
+                initial="hidden"
+                animate="visible"
+                variants={fadeInDown}
             >
                 <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                <motion.h1
-                    className="relative z-10 text-4xl md:text-5xl font-bold"
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1 }}
-                >
-                    Contact Us
-                </motion.h1>
-            </section>
+                <MotionH1 className="relative z-10 text-4xl md:text-5xl font-bold">Contact Us</MotionH1>
+            </MotionSection>
 
             {/* Contact Info & Form */}
             <section className="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12">
                 {/* Info */}
-                <motion.div
-                    initial={{ opacity: 0, x: -30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
-                >
+                <MotionDiv initial="hidden" whileInView="visible" viewport={{ once: true }} variants={slideInLeft}>
                     <h2 className="text-2xl font-semibold mb-4">We’d love to hear from you</h2>
                     <p className="text-gray-600 mb-6">Whether you're planning your stay or have questions, our team is here to help.</p>
                     <ul className="text-gray-700 space-y-4">
@@ -41,48 +84,76 @@ export default function ContactPage() {
                         <li>✉️ hello@lunabayresort.com</li>
                         <li>🕒 Open Daily: 7am – 10pm</li>
                     </ul>
-                </motion.div>
+                </MotionDiv>
 
                 {/* Form */}
-                <motion.form
+                <MotionForm
                     className="space-y-6"
-                    initial={{ opacity: 0, x: 30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                    initial="hidden"
+                    whileInView="visible"
                     viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        alert("Message sent!");
-                    }}
+                    variants={slideInRight}
+                    onSubmit={handleSubmit}
+                    noValidate
+                    aria-label="Contact form"
                 >
+                    {statusMessage && (
+                        <div
+                            role="alert"
+                            className={`p-3 rounded mb-4 text-center ${
+                                statusType === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                            }`}
+                        >
+                            {statusMessage}
+                        </div>
+                    )}
+
                     <div>
-                        <label className="block text-sm font-medium mb-1">Name</label>
+                        <label htmlFor="name" className="block text-sm font-medium mb-1">
+                            Name
+                        </label>
                         <input
+                            id="name"
+                            name="name"
+                            placeholder="Your full name"
                             type="text"
                             required
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                            className={inputStyles}
+                            aria-required="true"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Email</label>
+                        <label htmlFor="email" className="block text-sm font-medium mb-1">
+                            Email
+                        </label>
                         <input
+                            id="email"
+                            name="email"
+                            placeholder="Your email address"
                             type="email"
                             required
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                            className={inputStyles}
+                            aria-required="true"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Message</label>
+                        <label htmlFor="message" className="block text-sm font-medium mb-1">
+                            Message
+                        </label>
                         <textarea
+                            id="message"
+                            name="message"
+                            placeholder="Your message here..."
                             rows="5"
                             required
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                            className={inputStyles}
+                            aria-required="true"
                         />
                     </div>
                     <button type="submit" className="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition">
                         Send Message
                     </button>
-                </motion.form>
+                </MotionForm>
             </section>
 
             {/* Google Map */}
@@ -100,6 +171,6 @@ export default function ContactPage() {
             </section>
 
             <Footer />
-        </main>
+        </MotionMain>
     );
 }

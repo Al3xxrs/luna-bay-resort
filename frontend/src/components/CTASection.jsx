@@ -1,6 +1,7 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+
+const { h2: MotionH2, p: MotionP, div: MotionDiv } = motion;
 
 export default function CallToAction() {
     return (
@@ -12,7 +13,7 @@ export default function CallToAction() {
             <div className="absolute inset-0 bg-black/60" />
 
             <div className="relative z-10 max-w-4xl mx-auto text-center">
-                <motion.h2
+                <MotionH2
                     className="text-4xl md:text-5xl font-semibold mb-6"
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -20,9 +21,9 @@ export default function CallToAction() {
                     transition={{ duration: 0.6 }}
                 >
                     Ready to plan your escape?
-                </motion.h2>
+                </MotionH2>
 
-                <motion.p
+                <MotionP
                     className="text-lg md:text-xl mb-8 text-gray-200"
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -30,9 +31,9 @@ export default function CallToAction() {
                     transition={{ duration: 0.6, delay: 0.2 }}
                 >
                     Come find your peace at Luna Bay Resort — sun, sea, and serenity await.
-                </motion.p>
+                </MotionP>
 
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
@@ -40,11 +41,12 @@ export default function CallToAction() {
                 >
                     <Link
                         to="/booking"
+                        aria-label="Book your stay at Luna Bay Resort"
                         className="inline-block px-8 py-3 bg-white text-black font-medium rounded-full hover:bg-gray-100 transition"
                     >
                         Book Now
                     </Link>
-                </motion.div>
+                </MotionDiv>
             </div>
         </section>
     );

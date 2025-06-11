@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaBars, FaTimes } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+
+// Destructure only the motion elements used
+const { header: MotionHeader, nav: MotionNav, div: MotionDiv } = motion;
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -38,7 +41,7 @@ export default function Navbar() {
     }, []);
 
     return (
-        <motion.header
+        <MotionHeader
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
@@ -46,28 +49,27 @@ export default function Navbar() {
                 scrolled ? "bg-white/90 shadow-md" : "bg-white/30"
             } backdrop-blur-md`}
         >
-            <div className=" mx-auto px-6 md:px-12 flex items-center justify-between md:h-25 h-16">
+            <div className="mx-auto px-6 md:px-12 flex items-center justify-between md:h-25 h-16">
                 {/* Logo */}
                 <Link to="/" className="pb-2 space-x-2">
                     <img src="/images/logo.png" alt="Luna Bay Resort logo" className="object-contain md:h-24 h-16" />
                 </Link>
 
                 {/* Desktop Nav */}
-                <motion.nav className="hidden md:flex space-x-6 font-medium text-sm" variants={navVariants} initial="hidden" animate="show">
-                    {["About", "Rooms", "Gallery", "Contact"].map((label) => (
+                <MotionNav className="hidden md:flex space-x-6 font-medium text-sm" variants={navVariants} initial="hidden" animate="show">
+                    {["About", "Gallery", "Contact"].map((label) => (
                         <motion.div key={label} variants={linkVariants}>
                             <Link to={`/${label.toLowerCase()}`} className="hover:text-black/80 py-2">
                                 {label}
                             </Link>
                         </motion.div>
                     ))}
-
                     <motion.div variants={linkVariants}>
                         <Link to="/booking" className="bg-black text-white px-4 py-2 rounded-full hover:bg-gray-800 transition text-sm">
                             Book Now
                         </Link>
                     </motion.div>
-                </motion.nav>
+                </MotionNav>
 
                 {/* Mobile Menu Toggle */}
                 <div className="md:hidden text-xl cursor-pointer" onClick={toggleMenu} aria-label="Toggle navigation menu">
@@ -78,7 +80,7 @@ export default function Navbar() {
             {/* Mobile Menu */}
             <AnimatePresence>
                 {isOpen && (
-                    <motion.div
+                    <MotionDiv
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
@@ -90,9 +92,6 @@ export default function Navbar() {
                         <div className="flex flex-col items-center space-y-4 py-6 font-medium text-sm">
                             <Link to="/about" onClick={closeMenu}>
                                 About
-                            </Link>
-                            <Link to="/rooms" onClick={closeMenu}>
-                                Rooms
                             </Link>
                             <Link to="/gallery" onClick={closeMenu}>
                                 Gallery
@@ -108,9 +107,9 @@ export default function Navbar() {
                                 Book Now
                             </Link>
                         </div>
-                    </motion.div>
+                    </MotionDiv>
                 )}
             </AnimatePresence>
-        </motion.header>
+        </MotionHeader>
     );
 }

@@ -1,8 +1,10 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import React from "react";
 import { motion } from "framer-motion";
 
+const { div: MotionDiv, h2: MotionH2 } = motion;
+
+// Fade up animation variants with customizable delay based on index
 const fadeUp = {
     hidden: { opacity: 0, y: 30 },
     visible: (i = 0) => ({
@@ -19,14 +21,17 @@ const fadeUp = {
 export default function AboutPage() {
     return (
         <motion.main className="bg-white text-gray-800" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+            {/* Navigation bar */}
             <Navbar />
 
-            {/* Hero section */}
+            {/* Hero section with background image and overlay */}
             <section
                 className="w-full h-[60vh] bg-cover bg-center relative flex items-center justify-center text-white"
                 style={{ backgroundImage: "url('/images/about-full.jpg')" }}
             >
+                {/* Dark overlay with blur */}
                 <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                {/* Heading with fade-in from top */}
                 <motion.h1
                     className="relative z-10 text-5xl font-bold drop-shadow-md"
                     initial={{ opacity: 0, y: -20 }}
@@ -37,7 +42,7 @@ export default function AboutPage() {
                 </motion.h1>
             </section>
 
-            {/* Welcome block */}
+            {/* Welcome block with staggered fade-up animation */}
             <motion.section
                 className="max-w-5xl mx-auto px-6 py-16"
                 initial="hidden"
@@ -45,7 +50,9 @@ export default function AboutPage() {
                 viewport={{ once: true }}
                 variants={fadeUp}
             >
-                <motion.h2 className="text-3xl font-semibold mb-6 text-center">Your Escape to Serenity</motion.h2>
+                <motion.h2 className="text-3xl font-semibold mb-6 text-center" variants={fadeUp}>
+                    Your Escape to Serenity
+                </motion.h2>
                 <motion.p className="text-lg leading-relaxed text-center text-gray-600" custom={1} variants={fadeUp}>
                     Luna Bay Resort is more than a destination — it's a feeling. Nestled in a hidden cove where palm trees sway and time
                     slows down, our resort was designed for seekers of peace, luxury, and a touch of magic. Every guest becomes part of our
@@ -53,9 +60,10 @@ export default function AboutPage() {
                 </motion.p>
             </motion.section>
 
-            {/* Our story */}
+            {/* Our story section with image and text side by side */}
             <section className="bg-gray-50 py-16 px-6">
                 <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+                    {/* Image with slide-in from left */}
                     <motion.div
                         initial={{ opacity: 0, x: -40 }}
                         whileInView={{ opacity: 1, x: 0 }}
@@ -64,6 +72,7 @@ export default function AboutPage() {
                     >
                         <img src="/images/about-preview.jpg" alt="Our Story" className="rounded-xl shadow-lg w-full h-auto object-cover" />
                     </motion.div>
+                    {/* Text content with fade-up stagger */}
                     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
                         <motion.h3 className="text-2xl font-semibold mb-4" variants={fadeUp}>
                             A Story Carved in Sand and Sea
@@ -81,12 +90,13 @@ export default function AboutPage() {
                 </div>
             </section>
 
-            {/* What makes us special */}
+            {/* What makes us special section */}
             <motion.section className="py-20 px-6" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
                 <div className="max-w-5xl mx-auto text-center">
                     <motion.h3 className="text-2xl font-semibold mb-6" variants={fadeUp}>
                         What Makes Luna Bay Special
                     </motion.h3>
+                    {/* List of unique features with fade up per item */}
                     <ul className="grid md:grid-cols-3 gap-8 text-left mt-8">
                         {[
                             {
@@ -111,12 +121,14 @@ export default function AboutPage() {
                 </div>
             </motion.section>
 
-            {/* Final CTA */}
+            {/* Final call-to-action with background image and overlay */}
             <section
                 className="relative text-white py-20 px-6 text-center bg-cover bg-center"
                 style={{ backgroundImage: "url('/images/about-cta.jpg')" }}
             >
+                {/* Overlay */}
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                {/* Content container with staggered fade up */}
                 <motion.div
                     className="relative z-10"
                     initial="hidden"
@@ -152,6 +164,7 @@ export default function AboutPage() {
                 </motion.div>
             </section>
 
+            {/* Footer */}
             <Footer />
         </motion.main>
     );

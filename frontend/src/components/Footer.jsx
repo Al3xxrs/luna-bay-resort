@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { FaInstagram, FaFacebookF, FaTwitter, FaTripadvisor } from "react-icons/fa";
 
@@ -22,11 +21,6 @@ export default function Footer() {
                             </Link>
                         </li>
                         <li>
-                            <Link to="/rooms" className="hover:underline">
-                                Rooms
-                            </Link>
-                        </li>
-                        <li>
                             <Link to="/gallery" className="hover:underline">
                                 Gallery
                             </Link>
@@ -41,6 +35,11 @@ export default function Footer() {
                                 Book Now
                             </Link>
                         </li>
+                        <li>
+                            <a href="/admin/login" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                                Are you the admin?
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
@@ -48,16 +47,16 @@ export default function Footer() {
                 <div>
                     <h4 className="font-semibold mb-2">Connect</h4>
                     <div className="flex justify-center md:justify-start space-x-4 text-lg mb-3">
-                        <a href="#" className="hover:text-black">
+                        <a href="#" aria-label="Instagram" className="hover:text-black">
                             <FaInstagram />
                         </a>
-                        <a href="#" className="hover:text-black">
+                        <a href="#" aria-label="Facebook" className="hover:text-black">
                             <FaFacebookF />
                         </a>
-                        <a href="#" className="hover:text-black">
+                        <a href="#" aria-label="Twitter" className="hover:text-black">
                             <FaTwitter />
                         </a>
-                        <a href="#" className="hover:text-black">
+                        <a href="#" aria-label="Tripadvisor" className="hover:text-black">
                             <FaTripadvisor />
                         </a>
                     </div>

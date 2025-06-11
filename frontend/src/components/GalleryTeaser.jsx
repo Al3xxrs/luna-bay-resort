@@ -1,6 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const images = [
     "/images/gallery1.jpg",
@@ -11,10 +10,12 @@ const images = [
     "/images/gallery6.jpg",
 ];
 
+const { div: MotionDiv } = motion;
+
 export default function GalleryTeaser() {
     return (
         <section className="bg-white py-16 px-6 md:px-12">
-            <motion.div
+            <MotionDiv
                 className="max-w-6xl mx-auto text-center mb-12"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -23,11 +24,11 @@ export default function GalleryTeaser() {
             >
                 <h2 className="text-4xl font-semibold mb-4">Moments at Luna Bay</h2>
                 <p className="text-gray-600 text-lg">From sunrises to stargazing — take a glimpse into life at our resort.</p>
-            </motion.div>
+            </MotionDiv>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-6xl mx-auto mb-12">
                 {images.map((src, index) => (
-                    <motion.div
+                    <MotionDiv
                         key={index}
                         className="overflow-hidden rounded-xl shadow-md group"
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -40,11 +41,11 @@ export default function GalleryTeaser() {
                             alt={`Gallery ${index + 1}`}
                             className="w-full h-48 md:h-64 object-cover transform group-hover:scale-105 transition duration-300"
                         />
-                    </motion.div>
+                    </MotionDiv>
                 ))}
             </div>
 
-            <motion.div
+            <MotionDiv
                 className="text-center"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -57,7 +58,7 @@ export default function GalleryTeaser() {
                 >
                     View Full Gallery
                 </Link>
-            </motion.div>
+            </MotionDiv>
         </section>
     );
 }
