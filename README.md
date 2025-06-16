@@ -137,7 +137,7 @@ npm run dev
 
 ## 📚 Database Schema
 
-Located in [`luna-bay-resort.sql`](./luna-bay-resort.sql)
+Located in [`luna-bay-resort.sql`](database/luna-bay-resort.sql)
 
 Includes:
 
