@@ -78,7 +78,7 @@ cd luna-bay-resort
 
 ```sql
 -- Run this in your MySQL client
-SOURCE schema.sql;
+SOURCE luna-bay-resort.sql;
 ```
 
 ### 3. Environment Variables
