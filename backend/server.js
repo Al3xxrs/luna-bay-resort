@@ -33,15 +33,6 @@ app.use("/api/contact", contactRoutes);
 // Static files (uploads)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Production frontend serve (if applicable)
-if (process.env.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "client", "build")));
-
-    app.get("/{*any}", (req, res) => {
-        res.sendFile(path.join(__dirname, "client", "build", "index.html"));
-    });
-}
-
 // Server listen
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
