@@ -121,7 +121,6 @@ CREATE TABLE `room_features` (
 
 LOCK TABLES `room_features` WRITE;
 /*!40000 ALTER TABLE `room_features` DISABLE KEYS */;
-INSERT INTO `room_features` VALUES (2,1),(1,2),(3,3),(1,4),(1,5),(3,5),(1,6),(3,6),(2,8),(2,10),(3,11),(1,13),(2,13),(2,14),(1,16),(2,16),(3,16);
 /*!40000 ALTER TABLE `room_features` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -149,7 +148,6 @@ CREATE TABLE `rooms` (
 
 LOCK TABLES `rooms` WRITE;
 /*!40000 ALTER TABLE `rooms` DISABLE KEYS */;
-INSERT INTO `rooms` VALUES (1,'Ocean Bliss Suite','Wake up to panoramic views of the ocean in this luxurious suite featuring a private balcony and a spa-like bathroom. Perfect for romantic getaways.',420.00,'/uploads/images/rooms/1749889477311-473478189.jpg','2025-06-14 08:24:37'),(2,'Tropical Garden Villa','Surrounded by lush tropical flora, this private villa includes an outdoor shower, hammock, and its own plunge pool.\r\n\r\n',380.00,'/uploads/images/rooms/1749889552568-571102695.jpg','2025-06-14 08:25:52'),(3,'Sunset Bungalow','Cozy and romantic, this beachfront bungalow offers stunning sunset views with a fire pit for evening relaxation.',340.00,'/uploads/images/rooms/1749889600353-76446291.jpg','2025-06-14 08:26:40');
 /*!40000 ALTER TABLE `rooms` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

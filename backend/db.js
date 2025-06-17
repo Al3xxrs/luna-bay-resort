@@ -10,7 +10,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const caCert = fs.readFileSync(path.resolve(__dirname, "../ca.pem"));
+const caCert = fs.readFileSync(path.resolve(__dirname, "ca.pem"));
 
 // Create a connection pool to handle concurrent connections efficiently
 const pool = mysql.createPool({
