@@ -21,7 +21,7 @@ export default function BookingPage() {
     useEffect(() => {
         const fetchRooms = async () => {
             try {
-                const { data } = await axios.get("/api/rooms");
+                const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/rooms`);
                 setRooms(data);
             } catch (err) {
                 console.error("Failed to load rooms:", err);
@@ -51,8 +51,7 @@ export default function BookingPage() {
             const pricePerNight = selectedRoom ? parseFloat(selectedRoom.price_per_night) : 0;
             const total = pricePerNight * nights * guests;
 
-            // Check availability
-            const { data: availability } = await axios.get("/api/bookings/availability", {
+            const { data: availability } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/bookings/availability`, {
                 params: {
                     roomId: selectedRoom.id,
                     checkIn,
@@ -77,7 +76,7 @@ export default function BookingPage() {
                 totalPrice: total,
             };
 
-            await axios.post("/api/bookings", bookingData);
+            await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/bookings`, bookingData);
 
             alert("Booking successfully submitted!");
             closeModal();

@@ -32,7 +32,7 @@ const AdminRoomForm = ({ editingRoom, onSuccess }) => {
         const token = localStorage.getItem("adminToken");
 
         axios
-            .get("/api/admin/rooms/features", {
+            .get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/rooms/features`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -79,7 +79,7 @@ const AdminRoomForm = ({ editingRoom, onSuccess }) => {
         try {
             await axios({
                 method: editingRoom ? "put" : "post",
-                url: "/api/admin/rooms",
+                url: `${import.meta.env.VITE_API_BASE_URL}/api/admin/rooms`,
                 data,
                 headers: {
                     Authorization: `Bearer ${token}`,

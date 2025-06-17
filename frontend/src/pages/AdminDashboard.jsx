@@ -26,8 +26,8 @@ export default function AdminDashboard() {
     const fetchDashboardData = async (token) => {
         try {
             const [bookingsRes, roomsRes] = await Promise.all([
-                axios.get("/api/admin/bookings", { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get("/api/admin/rooms", { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/bookings`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/rooms`, { headers: { Authorization: `Bearer ${token}` } }),
             ]);
             setBookings(bookingsRes.data);
             setRooms(roomsRes.data);
@@ -55,7 +55,7 @@ export default function AdminDashboard() {
 
         try {
             await axios.put(
-                "/api/admin/bookings",
+                `${import.meta.env.VITE_API_BASE_URL}/api/admin/bookings`,
                 {
                     guest_id: editingBooking.guest_id,
                     room_id: editingBooking.room_id,
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
         if (!window.confirm("Are you sure you want to delete this booking?")) return;
 
         try {
-            await axios.delete("/api/admin/bookings", {
+            await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/bookings`, {
                 headers: { Authorization: `Bearer ${token}` },
                 data: {
                     guest_id: booking.guest_id,
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
         if (!window.confirm("Delete this room?")) return;
 
         try {
-            await axios.delete(`/api/admin/rooms/${id}`, {
+            await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/rooms/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             fetchDashboardData(token);

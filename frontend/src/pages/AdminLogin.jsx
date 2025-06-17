@@ -17,7 +17,7 @@ export default function AdminLogin() {
     const handleRequestCode = async () => {
         try {
             setError("");
-            await axios.post("/api/admin/request-code", { email });
+            await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/request-code`, { email });
             setStep(2);
         } catch (err) {
             handleError(err, "Failed to request code.");
@@ -28,7 +28,7 @@ export default function AdminLogin() {
     const handleVerifyCode = async () => {
         try {
             setError("");
-            const { data } = await axios.post("/api/admin/verify-code", { email, code });
+            const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/verify-code`, { email, code });
 
             localStorage.setItem("adminToken", data.token); // Persist session
             navigate("/admin-dashboard"); // Redirect to admin dashboard

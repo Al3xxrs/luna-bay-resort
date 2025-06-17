@@ -13,7 +13,7 @@ export default function RoomPreview() {
     useEffect(() => {
         const fetchRooms = async () => {
             try {
-                const { data } = await axios.get("/api/rooms");
+                const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/rooms`);
                 setRooms(data);
             } catch (err) {
                 console.error("Failed to load rooms:", err);

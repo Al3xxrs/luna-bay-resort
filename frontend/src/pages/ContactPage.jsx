@@ -40,7 +40,7 @@ export default function ContactPage() {
         const message = formData.get("message");
 
         try {
-            const response = await axios.post("/api/contact", { name, email, message });
+            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/contact`, { name, email, message });
             if (response.status === 200) {
                 setStatusMessage("Message sent successfully!");
                 setStatusType("success");
