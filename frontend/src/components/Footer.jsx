@@ -36,7 +36,7 @@ export default function Footer() {
                             </Link>
                         </li>
                         <li>
-                            <a href="/admin/login" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                            <a href="/admin-login" target="_blank" rel="noopener noreferrer" className="hover:underline">
                                 Are you the admin?
                             </a>
                         </li>

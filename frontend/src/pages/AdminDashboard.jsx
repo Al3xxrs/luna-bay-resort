@@ -16,7 +16,7 @@ export default function AdminDashboard() {
     useEffect(() => {
         const token = localStorage.getItem("adminToken");
         if (!token) {
-            navigate("/admin/login");
+            navigate("/admin-login");
         } else {
             fetchDashboardData(token);
         }
@@ -33,7 +33,7 @@ export default function AdminDashboard() {
             setRooms(roomsRes.data);
         } catch (err) {
             console.error("Error fetching data:", err);
-            navigate("/admin/login");
+            navigate("/admin-login");
         }
     };
 

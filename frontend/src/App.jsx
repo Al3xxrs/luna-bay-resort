@@ -16,7 +16,7 @@ function App() {
                 <Route path="/gallery" element={<GalleryPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/booking" element={<BookingPage />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin-login" element={<AdminLogin />} />
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />
             </Routes>
         </Router>
