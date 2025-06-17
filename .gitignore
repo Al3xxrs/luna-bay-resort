@@ -216,7 +216,3 @@ $RECYCLE.BIN/
 *.bak
 *.swp
 *.orig
-
-# Certificates
-*.pem
-*.crt
