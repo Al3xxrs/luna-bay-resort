@@ -5,4 +5,5 @@ const router = express.Router();
 
 router.post("/", createBooking);
 router.get("/availability", checkRoomAvailability);
+
 export default router;
