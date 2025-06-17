@@ -15,7 +15,7 @@ const caCert = fs.readFileSync(path.resolve(__dirname, "ca.pem"));
 // Create a connection pool to handle concurrent connections efficiently
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
-    port: parseInt(process.env.PORT), // ✅ add this line
+    port: parseInt(process.env.PORT),
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
