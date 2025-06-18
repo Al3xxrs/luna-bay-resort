@@ -149,7 +149,7 @@ const AdminRoomForm = ({ editingRoom, onSuccess }) => {
                 />
                 {formData.image_url && (
                     <img
-                        src={`${import.meta.env.VITE_API_BASE_URL}${formData.image_url}`}
+                        src={editingRoom ? formData.image_url : `${import.meta.env.VITE_API_BASE_URL}${formData.image_url}`}
                         alt="Preview"
                         className="mt-2 rounded w-full max-w-xs object-cover"
                     />
