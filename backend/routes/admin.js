@@ -25,7 +25,7 @@ const transporter = nodemailer.createTransport({
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const destinationPath = path.resolve("../frontend/public/images/rooms");
+        const destinationPath = path.resolve("../uploads/images/rooms");
         cb(null, destinationPath);
     },
     filename: function (req, file, cb) {

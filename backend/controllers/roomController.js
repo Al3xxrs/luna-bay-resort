@@ -37,7 +37,7 @@ export const getAllFeatures = async (req, res) => {
 // POST
 export const createRoom = async (req, res) => {
     const { name, description, price_per_night, features } = req.body;
-    const image_url = req.file ? `/uploads/images/rooms/${req.file.filename}` : null;
+    const image_url = req.file ? `../uploads/images/rooms/${req.file.filename}` : null;
 
     const conn = await db.getConnection();
     try {
@@ -76,7 +76,7 @@ export const createRoom = async (req, res) => {
 // PUT
 export const updateRoom = async (req, res) => {
     const { id, name, description, price_per_night, features } = req.body;
-    const image_url = req.file ? `/uploads/images/rooms/${req.file.filename}` : null;
+    const image_url = req.file ? `../uploads/images/rooms/${req.file.filename}` : null;
 
     if (!id) return res.status(400).json({ error: "Room ID is required" });
 
