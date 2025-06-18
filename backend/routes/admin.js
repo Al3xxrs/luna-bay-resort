@@ -6,6 +6,7 @@ import { getDashboardBookings, updateBookingByCompositeKey, deleteBookingByCompo
 import verifyAdmin from "../middleware/verifyAdmin.js";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 
 const router = express.Router();
 
@@ -25,7 +26,10 @@ const transporter = nodemailer.createTransport({
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const destinationPath = path.resolve("../uploads/images/rooms");
+        const destinationPath = path.resolve("uploads/images/rooms");
+        if (!fs.existsSync(destinationPath)) {
+            fs.mkdirSync(destinationPath, { recursive: true });
+        }
         cb(null, destinationPath);
     },
     filename: function (req, file, cb) {

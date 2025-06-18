@@ -31,7 +31,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/contact", contactRoutes);
 
 // Static files (uploads)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static("uploads"));
 
 // Server listen
 const PORT = process.env.PORT || 18473;
