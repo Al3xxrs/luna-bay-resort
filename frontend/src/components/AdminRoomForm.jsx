@@ -147,7 +147,13 @@ const AdminRoomForm = ({ editingRoom, onSuccess }) => {
                     }}
                     className="w-full border p-2 rounded"
                 />
-                {formData.image_url && <img src={formData.image_url} alt="Preview" className="mt-2 rounded w-full max-w-xs object-cover" />}
+                {formData.image_url && (
+                    <img
+                        src={`${import.meta.env.VITE_API_BASE_URL}${formData.image_url}`}
+                        alt="Preview"
+                        className="mt-2 rounded w-full max-w-xs object-cover"
+                    />
+                )}
             </div>
 
             <div>

@@ -43,7 +43,12 @@ export default function RoomPreview() {
             <div className="max-w-6xl mx-auto grid gap-8 md:grid-cols-3">
                 {rooms.slice(0, 3).map((room, index) => (
                     <MotionDiv key={room.id} className="bg-white rounded-2xl shadow-lg overflow-hidden" {...fadeUp(index * 0.2)}>
-                        <MotionImg src={room.image_url} alt={room.name} className="h-56 w-full object-cover" />
+                        <MotionImg
+                            src={`${import.meta.env.VITE_API_BASE_URL}${room.image_url}`}
+                            alt={room.name}
+                            className="h-56 w-full object-cover"
+                        />
+
                         <div className="p-6 text-left">
                             <h3 className="text-2xl font-semibold mb-2">{room.name}</h3>
                             <p className="text-gray-600 mb-4">{room.description}</p>

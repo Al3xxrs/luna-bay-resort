@@ -119,7 +119,11 @@ export default function BookingPage() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: i * 0.1 }}
                         >
-                            <img src={room.image_url} alt={room.name} className="h-60 w-full object-cover" />
+                            <img
+                                src={`${import.meta.env.VITE_API_BASE_URL}${room.image_url}`}
+                                alt={room.name}
+                                className="h-60 w-full object-cover"
+                            />
                             <div className="p-6 flex flex-col flex-grow">
                                 <h3 className="text-xl font-semibold mb-2">{room.name}</h3>
                                 <p className="text-gray-600 mb-4 flex-grow">{room.description}</p>
