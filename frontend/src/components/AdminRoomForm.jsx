@@ -7,9 +7,11 @@ const AdminRoomForm = ({ editingRoom, onSuccess }) => {
         description: "",
         price_per_night: "",
         image_url: "",
+        imageFile: null,
         features: [],
     });
     const [availableFeatures, setAvailableFeatures] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (editingRoom) {
@@ -33,16 +35,10 @@ const AdminRoomForm = ({ editingRoom, onSuccess }) => {
 
         axios
             .get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/rooms/features`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
             })
-            .then((res) => {
-                setAvailableFeatures(res.data);
-            })
-            .catch((err) => {
-                console.error("Failed to fetch features:", err);
-            });
+            .then((res) => setAvailableFeatures(res.data))
+            .catch((err) => console.error("Failed to fetch features:", err));
     }, []);
 
     const handleChange = (e) => {
@@ -61,6 +57,7 @@ const AdminRoomForm = ({ editingRoom, onSuccess }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         const token = localStorage.getItem("adminToken");
 
         const data = new FormData();
@@ -69,9 +66,8 @@ const AdminRoomForm = ({ editingRoom, onSuccess }) => {
         data.append("price_per_night", formData.price_per_night);
         data.append("features", JSON.stringify(formData.features));
         if (formData.imageFile) {
-            data.append("image", formData.imageFile); // assuming backend uses `req.file`
+            data.append("image", formData.imageFile);
         }
-
         if (editingRoom?.id) {
             data.append("id", editingRoom.id);
         }
@@ -90,45 +86,56 @@ const AdminRoomForm = ({ editingRoom, onSuccess }) => {
         } catch (err) {
             console.error("Failed to save room:", err);
             alert("Failed to save room.");
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <form className="space-y-4 bg-white p-6 shadow rounded-xl max-w-xl mx-auto" onSubmit={handleSubmit}>
-            <h2 className="text-2xl font-bold mb-2">{editingRoom ? "Edit Room" : "Create Room"}</h2>
-
-            <input
-                type="text"
-                name="name"
-                placeholder="Room name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full border p-2 rounded"
-            />
-
-            <textarea
-                name="description"
-                placeholder="Description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={3}
-                className="w-full border p-2 rounded"
-            />
-
-            <input
-                type="number"
-                step="0.01"
-                name="price_per_night"
-                placeholder="Price per night"
-                value={formData.price_per_night}
-                onChange={handleChange}
-                required
-                className="w-full border p-2 rounded"
-            />
+        <form className="space-y-6 bg-white p-8 max-w-2xl mx-auto " onSubmit={handleSubmit}>
+            <h2 className="text-3xl font-semibold text-gray-800 mb-4">{editingRoom ? "Edit Room" : "Create Room"}</h2>
 
             <div>
-                <label className="block mb-1 font-medium">Image</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Room Name</label>
+                <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3"
+                    placeholder="e.g. Deluxe Suite"
+                />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3"
+                    placeholder="Write a short room description..."
+                />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price per Night ($)</label>
+                <input
+                    type="number"
+                    step="0.01"
+                    name="price_per_night"
+                    value={formData.price_per_night}
+                    onChange={handleChange}
+                    required
+                    className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3"
+                    placeholder="e.g. 149.99"
+                />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Room Image</label>
                 <input
                     type="file"
                     accept="image/*"
@@ -136,8 +143,6 @@ const AdminRoomForm = ({ editingRoom, onSuccess }) => {
                         const file = e.target.files[0];
                         if (file) {
                             setFormData((prev) => ({ ...prev, imageFile: file }));
-
-                            // Preview
                             const reader = new FileReader();
                             reader.onloadend = () => {
                                 setFormData((prev) => ({ ...prev, image_url: reader.result }));
@@ -145,36 +150,52 @@ const AdminRoomForm = ({ editingRoom, onSuccess }) => {
                             reader.readAsDataURL(file);
                         }
                     }}
-                    className="w-full border p-2 rounded"
+                    className="w-full text-sm text-gray-600 file:border file:rounded-lg file:px-3 file:py-1.5 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                 />
                 {formData.image_url && (
                     <img
-                        src={editingRoom ? formData.image_url : `${import.meta.env.VITE_API_BASE_URL}${formData.image_url}`}
+                        src={
+                            formData.image_url.startsWith("data:")
+                                ? formData.image_url
+                                : `${import.meta.env.VITE_API_BASE_URL}${formData.image_url}`
+                        }
                         alt="Preview"
-                        className="mt-2 rounded w-full max-w-xs object-cover"
+                        className="mt-4 rounded-lg shadow-lg w-full max-w-sm object-cover transition-all duration-300"
                     />
                 )}
             </div>
 
             <div>
-                <label className="block mb-1 font-medium">Features</label>
-                <div className="grid grid-cols-2 gap-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Room Features</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {availableFeatures.map((f) => (
-                        <label key={f.id} className="flex items-center space-x-2">
+                        <label
+                            key={f.id}
+                            className="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg shadow-sm border border-gray-200 hover:bg-blue-50 transition"
+                        >
                             <input
                                 type="checkbox"
                                 checked={formData.features.includes(f.name)}
                                 onChange={() => handleFeatureToggle(f.name)}
+                                className="accent-blue-600"
                             />
-                            <span>{f.name}</span>
+                            <span className="text-sm text-gray-700">{f.name}</span>
                         </label>
                     ))}
                 </div>
             </div>
 
-            <button type="submit" className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-                {editingRoom ? "Update Room" : "Create Room"}
-            </button>
+            <div className="text-right">
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className={`inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition ${
+                        loading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                >
+                    {loading ? "Saving..." : editingRoom ? "Update Room" : "Create Room"}
+                </button>
+            </div>
         </form>
     );
 };

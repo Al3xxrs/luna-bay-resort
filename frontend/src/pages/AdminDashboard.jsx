@@ -69,11 +69,8 @@ export default function AdminDashboard() {
                     checkIn: editingBooking.checkIn,
                     checkOut: editingBooking.checkOut,
                     num_guests: editingBooking.guests,
-                    newGuestInfo: {
-                        fullName: editingBooking.fullName,
-                        email: editingBooking.email,
-                    },
-                    newRoomId: editingBooking.newRoomId,
+                    fullName: editingBooking.fullName,
+                    email: editingBooking.email,
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -144,6 +141,21 @@ export default function AdminDashboard() {
             console.error("Room delete failed:", err);
             alert("Could not delete room.");
         }
+    };
+
+    const calculateTotalPrice = () => {
+        const { checkIn, checkOut, room_id, guests } = editingBooking;
+        const room = rooms.find((r) => r.id === room_id);
+
+        if (!room || !checkIn || !checkOut || !guests) return 0;
+
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+        const nights = Math.floor((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+
+        if (nights < 1 || guests < 1) return 0;
+
+        return room.price_per_night * nights * guests;
     };
 
     return (
@@ -239,7 +251,7 @@ export default function AdminDashboard() {
             {/* Room Modal */}
             {roomModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
-                    <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 relative">
+                    <div className="bg-white rounded-4xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-hidden relative">
                         <button
                             onClick={() => setRoomModalOpen(false)}
                             className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-3xl leading-none"
@@ -247,14 +259,16 @@ export default function AdminDashboard() {
                         >
                             ×
                         </button>
-                        <AdminRoomForm
-                            editingRoom={editRoom}
-                            onSuccess={() => {
-                                fetchDashboardData(localStorage.getItem("adminToken"));
-                                setRoomModalOpen(false);
-                                setEditRoom(null);
-                            }}
-                        />
+                        <div className="overflow-y-auto max-h-[90vh] p-6">
+                            <AdminRoomForm
+                                editingRoom={editRoom}
+                                onSuccess={() => {
+                                    fetchDashboardData(localStorage.getItem("adminToken"));
+                                    setRoomModalOpen(false);
+                                    setEditRoom(null);
+                                }}
+                            />
+                        </div>
                     </div>
                 </div>
             )}
@@ -264,97 +278,114 @@ export default function AdminDashboard() {
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
                     <form
                         onSubmit={handleEditSubmit}
-                        className="bg-white p-6 rounded shadow-md w-full max-w-md space-y-4"
-                        aria-label="Edit booking form"
+                        className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-lg space-y-4 border border-gray-300"
                     >
-                        <h2 className="text-xl font-semibold">Edit Booking</h2>
+                        <h2 className="text-2xl font-bold text-center">Edit Booking</h2>
 
-                        <label>
-                            Full Name:
-                            <input
-                                type="text"
-                                className="w-full p-2 border rounded"
-                                value={editingBooking.fullName || ""}
-                                onChange={(e) => setEditingBooking({ ...editingBooking, fullName: e.target.value })}
-                            />
-                        </label>
+                        {/* Guest Info */}
+                        <div className="grid grid-cols-1 gap-4">
+                            <label className="block">
+                                Full Name
+                                <input
+                                    type="text"
+                                    className="w-full mt-1 p-2 border rounded"
+                                    value={editingBooking.fullName || ""}
+                                    onChange={(e) => setEditingBooking({ ...editingBooking, fullName: e.target.value })}
+                                />
+                            </label>
 
-                        <label>
-                            Email:
-                            <input
-                                type="email"
-                                className="w-full p-2 border rounded"
-                                value={editingBooking.email || ""}
-                                onChange={(e) => setEditingBooking({ ...editingBooking, email: e.target.value })}
-                            />
-                        </label>
+                            <label className="block">
+                                Email
+                                <input
+                                    type="email"
+                                    className="w-full mt-1 p-2 border rounded"
+                                    value={editingBooking.email || ""}
+                                    onChange={(e) => setEditingBooking({ ...editingBooking, email: e.target.value })}
+                                />
+                            </label>
+                        </div>
 
-                        <label>
-                            Room:
+                        {/* Room Selector with Price */}
+                        <label className="block">
+                            Room
                             <select
-                                className="w-full p-2 border rounded"
+                                className="w-full mt-1 p-2 border rounded"
                                 value={editingBooking.room_id}
-                                onChange={(e) =>
+                                onChange={(e) => {
+                                    const selectedRoom = rooms.find((r) => r.id === parseInt(e.target.value));
                                     setEditingBooking({
                                         ...editingBooking,
-                                        newRoomId: parseInt(e.target.value),
-                                        room_id: parseInt(e.target.value),
-                                    })
-                                }
+                                        newRoomId: selectedRoom.id,
+                                        room_id: selectedRoom.id,
+                                        roomPrice: selectedRoom.price_per_night,
+                                    });
+                                }}
                             >
                                 {rooms.map((room) => (
                                     <option key={room.id} value={room.id}>
-                                        {room.name}
+                                        {room.name} - ${room.price_per_night}/night
                                     </option>
                                 ))}
                             </select>
                         </label>
 
-                        <label>
-                            Check-in:
-                            <input
-                                type="date"
-                                className="w-full p-2 border rounded"
-                                value={editingBooking.checkIn}
-                                onChange={(e) => setEditingBooking({ ...editingBooking, checkIn: e.target.value })}
-                                required
-                            />
-                        </label>
+                        {/* Dates and Guests */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <label className="block">
+                                Check-in
+                                <input
+                                    type="date"
+                                    className="w-full mt-1 p-2 border rounded"
+                                    value={editingBooking.checkIn}
+                                    onChange={(e) => setEditingBooking({ ...editingBooking, checkIn: e.target.value })}
+                                    min={new Date().toISOString().split("T")[0]}
+                                    required
+                                />
+                            </label>
+                            <label className="block">
+                                Check-out
+                                <input
+                                    type="date"
+                                    className="w-full mt-1 p-2 border rounded"
+                                    value={editingBooking.checkOut}
+                                    onChange={(e) => setEditingBooking({ ...editingBooking, checkOut: e.target.value })}
+                                    min={editingBooking.checkIn}
+                                    required
+                                />
+                            </label>
+                        </div>
 
-                        <label>
-                            Check-out:
-                            <input
-                                type="date"
-                                className="w-full p-2 border rounded"
-                                value={editingBooking.checkOut}
-                                onChange={(e) => setEditingBooking({ ...editingBooking, checkOut: e.target.value })}
-                                required
-                            />
-                        </label>
-
-                        <label>
-                            Guests:
+                        <label className="block">
+                            Guests
                             <input
                                 type="number"
+                                className="w-full mt-1 p-2 border rounded"
                                 min="1"
-                                className="w-full p-2 border rounded"
                                 value={editingBooking.guests}
-                                onChange={(e) =>
-                                    setEditingBooking({
-                                        ...editingBooking,
-                                        guests: parseInt(e.target.value) || 1,
-                                    })
-                                }
-                                required
+                                onChange={(e) => setEditingBooking({ ...editingBooking, guests: parseInt(e.target.value) || 1 })}
                             />
                         </label>
 
-                        <div className="flex justify-end space-x-2">
-                            <button type="button" className="px-4 py-2 bg-gray-300 rounded" onClick={() => setEditModalOpen(false)}>
+                        {/* Live Price Preview */}
+                        {editingBooking.checkIn && editingBooking.checkOut && editingBooking.room_id && (
+                            <div className="text-center mt-4">
+                                <p className="text-lg font-medium text-gray-700">
+                                    Total Price: <span className="font-bold text-blue-600">${calculateTotalPrice()}</span>
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Buttons */}
+                        <div className="flex justify-end gap-3 pt-4">
+                            <button
+                                type="button"
+                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded"
+                                onClick={() => setEditModalOpen(false)}
+                            >
                                 Cancel
                             </button>
-                            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
-                                Save
+                            <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                Save Changes
                             </button>
                         </div>
                     </form>

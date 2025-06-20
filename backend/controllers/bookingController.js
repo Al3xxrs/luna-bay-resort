@@ -120,72 +120,54 @@ export const getDashboardBookings = async (req, res) => {
 };
 
 export const updateBookingByCompositeKey = async (req, res) => {
-    const {
-        guest_id,
-        room_id, // original room ID
-        originalCheckIn,
-        checkIn,
-        checkOut,
-        num_guests,
-        newGuestInfo, // { full_name, email }
-        newRoomId, // if changed
-    } = req.body;
+    const { guest_id, room_id, originalCheckIn, checkIn, checkOut, num_guests, fullName, email } = req.body;
 
-    const formatDate = (dateString) => new Date(dateString).toISOString().split("T")[0];
+    const formatDate = (dateString) => {
+        return new Date(dateString).toISOString().split("T")[0];
+    };
 
     const formattedOriginalCheckIn = formatDate(originalCheckIn);
     const formattedCheckIn = formatDate(checkIn);
     const formattedCheckOut = formatDate(checkOut);
-    const roomToUse = newRoomId || room_id;
 
     try {
         // 1. Get room price
-        const [roomResult] = await db.query(`SELECT price_per_night FROM rooms WHERE id = ?`, [roomToUse]);
+        const [[room]] = await db.query(`SELECT price_per_night FROM rooms WHERE id = ?`, [room_id]);
 
-        if (!roomResult.length) {
+        if (!room) {
             return res.status(404).json({ success: false, message: "Room not found" });
         }
 
-        const pricePerNight = roomResult[0].price_per_night;
+        // 2. Calculate number of nights
         const nights = (new Date(formattedCheckOut) - new Date(formattedCheckIn)) / (1000 * 60 * 60 * 24);
-        const totalPrice = pricePerNight * nights;
+        if (nights < 1) {
+            return res.status(400).json({ success: false, message: "Invalid date range" });
+        }
 
-        // 2. Update booking
+        // 3. Calculate new total price
+        const totalPrice = nights * room.price_per_night;
+
+        // 4. Update booking with price, guests, and dates
         const [updateResult] = await db.query(
             `UPDATE bookings
-             SET check_in = ?, check_out = ?, num_guests = ?, room_id = ?, total_price = ?
+             SET check_in = ?, check_out = ?, num_guests = ?, price = ?
              WHERE guest_id = ? AND room_id = ? AND check_in = ?`,
-            [formattedCheckIn, formattedCheckOut, num_guests, roomToUse, totalPrice, guest_id, room_id, formattedOriginalCheckIn]
+            [formattedCheckIn, formattedCheckOut, num_guests, totalPrice, guest_id, room_id, formattedOriginalCheckIn]
         );
 
         if (updateResult.affectedRows === 0) {
             return res.status(404).json({ success: false, message: "Booking not found" });
         }
 
-        // 3. Update guest info if provided
-        if (newGuestInfo) {
-            const updates = [];
-            const params = [];
-
-            if (newGuestInfo.fullName) {
-                updates.push("full_name = ?");
-                params.push(newGuestInfo.fullName);
-            }
-            if (newGuestInfo.email) {
-                updates.push("email = ?");
-                params.push(newGuestInfo.email);
-            }
-
-            if (updates.length > 0) {
-                params.push(guest_id);
-                await db.query(`UPDATE guests SET ${updates.join(", ")} WHERE id = ?`, params);
-            }
+        // 5. Optionally update guest info
+        if (fullName || email) {
+            await db.query(`UPDATE guests SET full_name = ?, email = ? WHERE id = ?`, [fullName, email, guest_id]);
         }
 
-        res.json({ success: true, message: "Booking and guest updated", totalPrice });
+        res.json({ success: true, message: "Booking updated successfully." });
     } catch (err) {
-        console.error("Update failed:", err);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Error updating booking:", err);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
