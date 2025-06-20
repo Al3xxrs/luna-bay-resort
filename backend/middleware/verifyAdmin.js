@@ -12,7 +12,6 @@ function verifyAdmin(req, res, next) {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Check for admin role
         if (decoded.role !== "admin") {
             return res.status(403).json({ error: "Admins only" });
         }
@@ -21,6 +20,9 @@ function verifyAdmin(req, res, next) {
         next();
     } catch (err) {
         console.error("JWT verification error:", err);
+        if (err.name === "TokenExpiredError") {
+            return res.status(401).json({ error: "Token has expired" });
+        }
         return res.status(401).json({ error: "Invalid token" });
     }
 }

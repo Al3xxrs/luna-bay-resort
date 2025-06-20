@@ -1,8 +1,6 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { motion } from "framer-motion";
-
-const { div: MotionDiv, h2: MotionH2 } = motion;
+import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 
 // Fade up animation variants with customizable delay based on index
 const fadeUp = {

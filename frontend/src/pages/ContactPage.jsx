@@ -1,11 +1,8 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 import axios from "axios";
 import { useState } from "react";
-
-// Extract motion components to avoid eslint unused vars error
-const { main: MotionMain, section: MotionSection, h1: MotionH1, div: MotionDiv, form: MotionForm } = motion;
 
 // Animation variants
 const fadeInDown = {
@@ -28,11 +25,14 @@ const inputStyles = "w-full border border-gray-300 rounded-lg px-4 py-2 focus:ou
 export default function ContactPage() {
     const [statusMessage, setStatusMessage] = useState(null);
     const [statusType, setStatusType] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     // Form submit handler
     async function handleSubmit(e) {
         e.preventDefault();
         setStatusMessage(null);
+        setStatusType(null);
+        setLoading(true);
 
         const formData = new FormData(e.target);
         const name = formData.get("name");
@@ -53,15 +53,17 @@ export default function ContactPage() {
             console.error("Contact form error:", error);
             setStatusMessage("Something went wrong. Please try again later.");
             setStatusType("error");
+        } finally {
+            setLoading(false);
         }
     }
 
     return (
-        <MotionMain className="bg-white text-gray-800" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+        <motion.main className="bg-white text-gray-800" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
             <Navbar />
 
             {/* Hero */}
-            <MotionSection
+            <motion.section
                 className="h-[50vh] bg-cover bg-center relative flex items-center justify-center text-white"
                 style={{ backgroundImage: "url('/images/contact-hero.jpg')" }}
                 initial="hidden"
@@ -69,13 +71,13 @@ export default function ContactPage() {
                 variants={fadeInDown}
             >
                 <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                <MotionH1 className="relative z-10 text-4xl md:text-5xl font-bold">Contact Us</MotionH1>
-            </MotionSection>
+                <motion.h1 className="relative z-10 text-4xl md:text-5xl font-bold">Contact Us</motion.h1>
+            </motion.section>
 
             {/* Contact Info & Form */}
             <section className="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12">
                 {/* Info */}
-                <MotionDiv initial="hidden" whileInView="visible" viewport={{ once: true }} variants={slideInLeft}>
+                <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={slideInLeft}>
                     <h2 className="text-2xl font-semibold mb-4">We’d love to hear from you</h2>
                     <p className="text-gray-600 mb-6">Whether you're planning your stay or have questions, our team is here to help.</p>
                     <ul className="text-gray-700 space-y-4">
@@ -84,10 +86,10 @@ export default function ContactPage() {
                         <li>✉️ hello@lunabayresort.com</li>
                         <li>🕒 Open Daily: 7am – 10pm</li>
                     </ul>
-                </MotionDiv>
+                </motion.div>
 
                 {/* Form */}
-                <MotionForm
+                <motion.form
                     className="space-y-6"
                     initial="hidden"
                     whileInView="visible"
@@ -100,6 +102,7 @@ export default function ContactPage() {
                     {statusMessage && (
                         <div
                             role="alert"
+                            aria-live="polite"
                             className={`p-3 rounded mb-4 text-center ${
                                 statusType === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                             }`}
@@ -150,10 +153,16 @@ export default function ContactPage() {
                             aria-required="true"
                         />
                     </div>
-                    <button type="submit" className="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition">
-                        Send Message
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className={`bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition ${
+                            loading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                    >
+                        {loading ? "Sending..." : "Send Message"}
                     </button>
-                </MotionForm>
+                </motion.form>
             </section>
 
             {/* Google Map */}
@@ -171,6 +180,6 @@ export default function ContactPage() {
             </section>
 
             <Footer />
-        </MotionMain>
+        </motion.main>
     );
 }

@@ -1,8 +1,5 @@
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 import { FaUmbrellaBeach, FaSwimmer, FaSpa, FaUtensils, FaCocktail, FaWifi } from "react-icons/fa";
-
-// Destructure motion.div to avoid "defined but never used" warning
-const { div: MotionDiv, h2: MotionH2, p: MotionP } = motion;
 
 const amenities = [
     { icon: FaUmbrellaBeach, title: "Private Beach" },
@@ -17,7 +14,7 @@ export default function Amenities() {
     return (
         <section className="bg-white py-16 px-6 md:px-12">
             <div className="max-w-6xl mx-auto text-center mb-12">
-                <MotionH2
+                <motion.h2
                     className="text-4xl font-semibold mb-4"
                     initial={{ opacity: 0, y: -20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -25,8 +22,8 @@ export default function Amenities() {
                     transition={{ duration: 0.6 }}
                 >
                     Resort Amenities
-                </MotionH2>
-                <MotionP
+                </motion.h2>
+                <motion.p
                     className="text-gray-600 text-lg"
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
@@ -34,14 +31,14 @@ export default function Amenities() {
                     transition={{ duration: 0.6, delay: 0.2 }}
                 >
                     Everything you need for a luxurious, relaxing stay.
-                </MotionP>
+                </motion.p>
             </div>
 
             <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-8 text-center">
                 {amenities.map(({ icon, title }, index) => {
                     const Icon = icon;
                     return (
-                        <MotionDiv
+                        <motion.div
                             key={title}
                             className="flex flex-col items-center"
                             initial={{ opacity: 0, y: 20 }}
@@ -53,7 +50,7 @@ export default function Amenities() {
                                 <Icon className="text-3xl text-black" />
                             </div>
                             <p className="text-sm font-medium">{title}</p>
-                        </MotionDiv>
+                        </motion.div>
                     );
                 })}
             </div>

@@ -1,4 +1,6 @@
 import db from "../db.js";
+import path from "path";
+import fs from "fs";
 
 // GET
 export const getAllRooms = async (req, res) => {
@@ -37,7 +39,18 @@ export const getAllFeatures = async (req, res) => {
 // POST
 export const createRoom = async (req, res) => {
     const { name, description, price_per_night, features } = req.body;
+    if (!name || !description || !price_per_night || !features) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
     const image_url = req.file ? `/uploads/images/rooms/${req.file.filename}` : null;
+
+    let parsed;
+    try {
+        parsed = JSON.parse(features);
+    } catch {
+        return res.status(400).json({ error: "Invalid features format" });
+    }
 
     const conn = await db.getConnection();
     try {
@@ -49,16 +62,19 @@ export const createRoom = async (req, res) => {
             price_per_night,
             image_url,
         ]);
-
         const roomId = result.insertId;
 
-        const parsed = JSON.parse(features);
-        if (Array.isArray(parsed)) {
-            for (const feature of parsed) {
-                const [[f]] = await conn.query("SELECT id FROM features WHERE name = ?", [feature]);
-                if (f) {
-                    await conn.query("INSERT INTO room_features (room_id, feature_id) VALUES (?, ?)", [roomId, f.id]);
-                }
+        const featureNames = Array.isArray(parsed) ? parsed : [];
+        if (featureNames.length > 0) {
+            const [rows] = await conn.query("SELECT id, name FROM features WHERE name IN (?)", [featureNames]);
+            const map = new Map(rows.map((f) => [f.name, f.id]));
+            const inserts = featureNames
+                .map((name) => map.get(name))
+                .filter(Boolean)
+                .map((fid) => [roomId, fid]);
+
+            if (inserts.length > 0) {
+                await conn.query("INSERT INTO room_features (room_id, feature_id) VALUES ?", [inserts]);
             }
         }
 
@@ -78,27 +94,49 @@ export const updateRoom = async (req, res) => {
     const { id, name, description, price_per_night, features } = req.body;
     const image_url = req.file ? `/uploads/images/rooms/${req.file.filename}` : null;
 
-    if (!id) return res.status(400).json({ error: "Room ID is required" });
+    if (!id) {
+        return res.status(400).json({ error: "Room ID is required" });
+    }
 
     const conn = await db.getConnection();
     try {
         await conn.beginTransaction();
 
+        // Clean up old image if a new one was uploaded
+        if (image_url) {
+            const [[oldRoom]] = await conn.query("SELECT image_url FROM rooms WHERE id = ?", [id]);
+            if (oldRoom?.image_url) {
+                const oldImagePath = path.resolve("uploads", oldRoom.image_url.replace("/uploads/", ""));
+                fs.unlink(oldImagePath, (err) => {
+                    if (err) console.warn("Failed to delete old image:", err.message);
+                });
+            }
+        }
+
+        // Build and run update query
         const updateSql = image_url
             ? "UPDATE rooms SET name = ?, description = ?, price_per_night = ?, image_url = ? WHERE id = ?"
             : "UPDATE rooms SET name = ?, description = ?, price_per_night = ? WHERE id = ?";
         const updateParams = image_url ? [name, description, price_per_night, image_url, id] : [name, description, price_per_night, id];
 
         await conn.query(updateSql, updateParams);
+
+        // Replace room_features
         await conn.query("DELETE FROM room_features WHERE room_id = ?", [id]);
 
-        const parsed = JSON.parse(features);
-        if (Array.isArray(parsed)) {
+        let parsed;
+        try {
+            parsed = JSON.parse(features);
+        } catch (err) {
+            throw new Error("Invalid JSON in 'features'");
+        }
+
+        if (Array.isArray(parsed) && parsed.length > 0) {
             const [rows] = await conn.query("SELECT id, name FROM features WHERE name IN (?)", [parsed]);
-            const map = new Map(rows.map((f) => [f.name, f.id]));
+            const featureMap = new Map(rows.map((f) => [f.name, f.id]));
 
             const inserts = parsed
-                .map((name) => map.get(name))
+                .map((name) => featureMap.get(name))
                 .filter(Boolean)
                 .map((fid) => [id, fid]);
 
@@ -112,7 +150,7 @@ export const updateRoom = async (req, res) => {
     } catch (err) {
         await conn.rollback();
         console.error("Error updating room:", err);
-        res.status(500).json({ error: "Failed to update room" });
+        res.status(500).json({ error: err.message || "Failed to update room" });
     } finally {
         conn.release();
     }

@@ -3,25 +3,41 @@ import { sendConfirmationEmail } from "../utils/sendEmail.js";
 
 export const createBooking = async (req, res) => {
     try {
-        const { fullName, email, phone, roomId, checkIn, checkOut, guests, totalPrice, roomName } = req.body;
+        const { fullName, email, phone, roomId, checkIn, checkOut, guests, totalPrice } = req.body;
 
         if (!fullName || !email || !roomId || !checkIn || !checkOut || !guests || !totalPrice) {
             return res.status(400).json({ error: "Missing required booking fields." });
         }
 
-        // Normalize dates (optional but recommended)
         const checkInDate = new Date(checkIn);
         const checkOutDate = new Date(checkOut);
+        if (isNaN(checkInDate) || isNaN(checkOutDate) || checkOutDate <= checkInDate) {
+            return res.status(400).json({ error: "Invalid check-in/check-out dates." });
+        }
 
-        // Start transaction
         const conn = await db.getConnection();
         try {
             await conn.beginTransaction();
 
-            // Check if guest exists
+            // Confirm room exists
+            const [[room]] = await conn.query("SELECT name FROM rooms WHERE id = ?", [roomId]);
+            if (!room) {
+                return res.status(400).json({ error: "Selected room does not exist." });
+            }
+
+            // Prevent double booking
+            const [conflicts] = await conn.query(
+                `SELECT 1 FROM bookings 
+                 WHERE room_id = ? AND check_in < ? AND check_out > ?`,
+                [roomId, checkOutDate, checkInDate]
+            );
+            if (conflicts.length > 0) {
+                return res.status(409).json({ error: "Room is already booked for those dates." });
+            }
+
+            // Ensure guest record
             const [existingGuests] = await conn.query("SELECT id FROM guests WHERE email = ?", [email]);
             let guestId;
-
             if (existingGuests.length > 0) {
                 guestId = existingGuests[0].id;
             } else {
@@ -33,23 +49,26 @@ export const createBooking = async (req, res) => {
                 guestId = guestResult.insertId;
             }
 
-            // Insert booking
+            // Create booking
             await conn.query(
-                `INSERT INTO bookings 
-           (guest_id, room_id, check_in, check_out, num_guests, total_price)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+                `INSERT INTO bookings (guest_id, room_id, check_in, check_out, num_guests, total_price)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
                 [guestId, roomId, checkInDate, checkOutDate, guests, totalPrice]
             );
 
             await conn.commit();
 
-            await sendConfirmationEmail(email, fullName, {
-                roomName,
-                checkIn: checkInDate.toISOString().split("T")[0],
-                checkOut: checkOutDate.toISOString().split("T")[0],
-                guests,
-                totalPrice,
-            });
+            try {
+                await sendConfirmationEmail(email, fullName, {
+                    roomName: room.name,
+                    checkIn: checkInDate.toISOString().split("T")[0],
+                    checkOut: checkOutDate.toISOString().split("T")[0],
+                    guests,
+                    totalPrice,
+                });
+            } catch (emailErr) {
+                console.warn("Email send failed, but booking succeeded:", emailErr.message);
+            }
 
             res.status(201).json({ message: "Booking created successfully" });
         } catch (err) {

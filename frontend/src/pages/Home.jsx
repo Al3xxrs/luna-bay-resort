@@ -14,7 +14,7 @@ const Footer = lazy(() => import("../components/Footer"));
 export default function Home() {
     return (
         <div className="flex flex-col">
-            <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
+            <Suspense fallback={<div className="text-center py-20 animate-pulse text-gray-500">Loading sections...</div>}>
                 <Navbar />
                 <Hero />
                 <AboutPreview />

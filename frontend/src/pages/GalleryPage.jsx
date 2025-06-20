@@ -1,8 +1,6 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { motion } from "framer-motion";
-
-const { h1: MotionH1, h2: MotionH2, div: MotionDiv } = motion;
+import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 
 // Array of gallery image URLs
 const images = [

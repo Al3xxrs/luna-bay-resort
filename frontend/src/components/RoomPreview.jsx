@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 import axios from "axios";
-
-// Destructure motion elements to avoid ESLint "unused variable" warnings
-const { div: MotionDiv, img: MotionImg } = motion;
 
 export default function RoomPreview() {
     const [rooms, setRooms] = useState([]);
@@ -34,16 +31,16 @@ export default function RoomPreview() {
     return (
         <section className="bg-gray-50 py-16 px-6 md:px-12">
             {/* Section Heading */}
-            <MotionDiv className="max-w-6xl mx-auto text-center mb-12" {...fadeUp(0)} transition={{ duration: 0.6 }}>
+            <motion.div className="max-w-6xl mx-auto text-center mb-12" {...fadeUp(0)} transition={{ duration: 0.6 }}>
                 <h2 className="text-4xl font-semibold mb-4">Featured Rooms</h2>
                 <p className="text-gray-600 text-lg">Discover your perfect stay — whether it's beachside luxury or jungle serenity.</p>
-            </MotionDiv>
+            </motion.div>
 
             {/* Room Cards */}
             <div className="max-w-6xl mx-auto grid gap-8 md:grid-cols-3">
                 {rooms.slice(0, 3).map((room, index) => (
-                    <MotionDiv key={room.id} className="bg-white rounded-2xl shadow-lg overflow-hidden" {...fadeUp(index * 0.2)}>
-                        <MotionImg
+                    <motion.div key={room.id} className="bg-white rounded-2xl shadow-lg overflow-hidden" {...fadeUp(index * 0.2)}>
+                        <motion.img
                             src={`${import.meta.env.VITE_API_BASE_URL}${room.image_url}`}
                             alt={room.name}
                             className="h-56 w-full object-cover"
@@ -62,19 +59,19 @@ export default function RoomPreview() {
                                 View Details
                             </Link>
                         </div>
-                    </MotionDiv>
+                    </motion.div>
                 ))}
             </div>
 
             {/* CTA Button */}
-            <MotionDiv className="text-center mt-12" {...fadeUp(0.5)}>
+            <motion.div className="text-center mt-12" {...fadeUp(0.5)}>
                 <Link
                     to="/booking"
                     className="inline-block px-8 py-3 bg-black text-white rounded-full text-lg hover:bg-gray-800 transition"
                 >
                     View All Rooms
                 </Link>
-            </MotionDiv>
+            </motion.div>
         </section>
     );
 }

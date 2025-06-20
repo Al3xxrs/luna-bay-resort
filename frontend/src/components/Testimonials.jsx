@@ -1,11 +1,9 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-
-const { div: MotionDiv } = motion;
 
 const testimonials = [
     {

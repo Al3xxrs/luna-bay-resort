@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaBars, FaTimes } from "react-icons/fa";
-import { AnimatePresence, motion } from "framer-motion";
-
-// Destructure only the motion elements used
-const { header: MotionHeader, nav: MotionNav, div: MotionDiv } = motion;
+import { AnimatePresence, motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -41,7 +38,7 @@ export default function Navbar() {
     }, []);
 
     return (
-        <MotionHeader
+        <motion.header
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
@@ -56,7 +53,7 @@ export default function Navbar() {
                 </Link>
 
                 {/* Desktop Nav */}
-                <MotionNav className="hidden md:flex space-x-6 font-medium text-sm" variants={navVariants} initial="hidden" animate="show">
+                <motion.nav className="hidden md:flex space-x-6 font-medium text-sm" variants={navVariants} initial="hidden" animate="show">
                     {["About", "Gallery", "Contact"].map((label) => (
                         <motion.div key={label} variants={linkVariants}>
                             <Link to={`/${label.toLowerCase()}`} className="hover:text-black/80 py-2">
@@ -69,7 +66,7 @@ export default function Navbar() {
                             Book Now
                         </Link>
                     </motion.div>
-                </MotionNav>
+                </motion.nav>
 
                 {/* Mobile Menu Toggle */}
                 <div className="md:hidden text-xl cursor-pointer" onClick={toggleMenu} aria-label="Toggle navigation menu">
@@ -80,7 +77,7 @@ export default function Navbar() {
             {/* Mobile Menu */}
             <AnimatePresence>
                 {isOpen && (
-                    <MotionDiv
+                    <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
@@ -107,9 +104,9 @@ export default function Navbar() {
                                 Book Now
                             </Link>
                         </div>
-                    </MotionDiv>
+                    </motion.div>
                 )}
             </AnimatePresence>
-        </MotionHeader>
+        </motion.header>
     );
 }

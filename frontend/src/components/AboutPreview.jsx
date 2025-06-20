@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-
-const { div: MotionDiv, h2: MotionH2, p: MotionP } = motion;
+import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 
 export default function AboutPreview() {
     // Animation for image entrance from the left

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 // Destructure motion elements to prevent ESLint 'unused' warnings
 const { div: MotionDiv, h1: MotionH1, p: MotionP, a: MotionA } = motion;
@@ -45,7 +46,8 @@ export default function Hero() {
                 </MotionP>
 
                 <MotionA
-                    href="/booking"
+                    as={Link}
+                    to="/booking"
                     className="px-8 py-3 bg-white text-black rounded-full text-lg font-medium shadow-lg hover:bg-gray-100"
                     variants={fadeUp}
                 >

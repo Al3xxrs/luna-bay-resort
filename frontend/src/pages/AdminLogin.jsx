@@ -7,38 +7,43 @@ export default function AdminLogin() {
     const [email, setEmail] = useState("");
     const [code, setCode] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
-    const inputStyles = "w-full border p-3 rounded mb-4";
-    const buttonStyles = "w-full bg-black text-white py-3 rounded hover:bg-gray-800 transition";
+    const inputStyles = "w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-black";
+    const buttonStyles =
+        "w-full bg-black text-white py-3 rounded hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed";
 
     const handleRequestCode = async (e) => {
         e.preventDefault();
+        setError("");
+        setLoading(true);
         try {
-            setError("");
             await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/request-code`, { email });
             setStep(2);
         } catch (err) {
-            handleError(err, "Failed to request code.");
+            const message = err.response?.data?.message || "Failed to request code.";
+            setError(message);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleVerifyCode = async (e) => {
         e.preventDefault();
+        setError("");
+        setLoading(true);
         try {
-            setError("");
             const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/verify-code`, { email, code });
             localStorage.setItem("adminToken", data.token);
             navigate("/admin-dashboard");
         } catch (err) {
-            handleError(err, "Failed to verify code.");
+            const message = err.response?.data?.message || "Failed to verify code.";
+            setError(message);
+        } finally {
+            setLoading(false);
         }
-    };
-
-    const handleError = (err, fallbackMsg) => {
-        const message = err.response?.data?.message || fallbackMsg;
-        setError(message);
     };
 
     return (
@@ -46,44 +51,57 @@ export default function AdminLogin() {
             <div className="bg-white shadow-md rounded-xl p-8 w-full max-w-md">
                 <h2 className="text-2xl font-semibold mb-6 text-center">Admin Login</h2>
 
-                {/* Step 1: Email Form */}
                 {step === 1 && (
-                    <form onSubmit={handleRequestCode}>
+                    <form onSubmit={handleRequestCode} aria-label="Request login code form">
+                        <label htmlFor="admin-email" className="sr-only">
+                            Admin Email
+                        </label>
                         <input
+                            id="admin-email"
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Enter admin email"
                             className={inputStyles}
                             required
-                            aria-label="Admin Email"
+                            aria-required="true"
+                            autoComplete="email"
+                            disabled={loading}
                         />
-                        <button type="submit" className={buttonStyles}>
-                            Send Code
+                        <button type="submit" className={buttonStyles} disabled={loading}>
+                            {loading ? "Sending..." : "Send Code"}
                         </button>
                     </form>
                 )}
 
-                {/* Step 2: Code Form */}
                 {step === 2 && (
-                    <form onSubmit={handleVerifyCode}>
+                    <form onSubmit={handleVerifyCode} aria-label="Verify code form">
+                        <label htmlFor="verification-code" className="sr-only">
+                            Verification Code
+                        </label>
                         <input
+                            id="verification-code"
                             type="text"
                             value={code}
                             onChange={(e) => setCode(e.target.value)}
                             placeholder="Enter verification code"
                             className={inputStyles}
                             required
-                            aria-label="Verification Code"
+                            aria-required="true"
+                            disabled={loading}
+                            autoComplete="one-time-code"
                         />
-                        <button type="submit" className={buttonStyles}>
-                            Verify Code
+                        <button type="submit" className={buttonStyles} disabled={loading}>
+                            {loading ? "Verifying..." : "Verify Code"}
                         </button>
                     </form>
                 )}
 
-                {/* Error Message */}
-                {error && <p className="mt-4 text-red-500 text-sm text-center">{error}</p>}
+                {error && (
+                    <p className="mt-4 text-red-500 text-sm text-center" role="alert" aria-live="polite">
+                        {error}
+                    </p>
+                )}
             </div>
         </main>
     );

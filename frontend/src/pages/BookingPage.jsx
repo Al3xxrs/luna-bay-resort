@@ -12,12 +12,12 @@ export default function BookingPage() {
     const [checkIn, setCheckIn] = useState("");
     const [checkOut, setCheckOut] = useState("");
     const [guests, setGuests] = useState(1);
+    const [loading, setLoading] = useState(false);
 
-    // Reusable styles
     const inputStyles = "border rounded-md p-3 w-full";
-    const buttonStyles = "w-full bg-black text-white py-3 rounded-md font-medium hover:bg-gray-900 transition";
+    const buttonStyles =
+        "w-full bg-black text-white py-3 rounded-md font-medium hover:bg-gray-900 transition disabled:opacity-50 disabled:cursor-not-allowed";
 
-    // Fetch room data
     useEffect(() => {
         const fetchRooms = async () => {
             try {
@@ -38,19 +38,35 @@ export default function BookingPage() {
 
     const closeModal = () => {
         setShowModal(false);
+        setSelectedRoom(null);
         setCheckIn("");
         setCheckOut("");
         setGuests(1);
+        setLoading(false);
+    };
+
+    const isValidBooking = () => {
+        if (!checkIn || !checkOut) return false;
+        if (new Date(checkOut) <= new Date(checkIn)) return false;
+        if (guests < 1) return false;
+        return true;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!isValidBooking()) {
+            alert("Please provide valid booking dates and guest count.");
+            return;
+        }
+
+        setLoading(true);
 
         try {
             const nights = (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24);
             const pricePerNight = selectedRoom ? parseFloat(selectedRoom.price_per_night) : 0;
             const total = pricePerNight * nights * guests;
 
+            // Check availability
             const { data: availability } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/bookings/availability`, {
                 params: {
                     roomId: selectedRoom.id,
@@ -61,13 +77,14 @@ export default function BookingPage() {
 
             if (!availability.available) {
                 alert("This room is not available during the selected period. Please choose different dates.");
+                setLoading(false);
                 return;
             }
 
             const bookingData = {
-                fullName: e.target[0].value,
-                email: e.target[1].value,
-                phone: e.target[2].value,
+                fullName: e.target.fullName.value,
+                email: e.target.email.value,
+                phone: e.target.phone.value,
                 roomId: selectedRoom.id,
                 roomName: selectedRoom.name,
                 checkIn,
@@ -83,6 +100,7 @@ export default function BookingPage() {
         } catch (err) {
             console.error(err);
             alert("Something went wrong. Please try again.");
+            setLoading(false);
         }
     };
 
@@ -153,6 +171,8 @@ export default function BookingPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ duration: 0.3 }}
+                        aria-modal="true"
+                        role="dialog"
                     >
                         <div className="bg-white rounded-xl shadow-lg max-w-xl w-full p-8 relative">
                             <button
@@ -165,17 +185,39 @@ export default function BookingPage() {
 
                             <h3 className="text-2xl font-semibold mb-6">Complete Your Booking</h3>
 
-                            <form onSubmit={handleSubmit} className="space-y-4">
+                            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                                 <div className="grid md:grid-cols-2 gap-4">
-                                    <input type="text" required placeholder="Full Name" className={inputStyles} />
-                                    <input type="email" required placeholder="Email Address" className={inputStyles} />
-                                    <input type="tel" required placeholder="Phone Number" className={inputStyles} />
+                                    <input
+                                        type="text"
+                                        name="fullName"
+                                        required
+                                        placeholder="Full Name"
+                                        className={inputStyles}
+                                        aria-required="true"
+                                    />
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        required
+                                        placeholder="Email Address"
+                                        className={inputStyles}
+                                        aria-required="true"
+                                    />
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        required
+                                        placeholder="Phone Number"
+                                        className={inputStyles}
+                                        aria-required="true"
+                                    />
                                     <input
                                         type="date"
                                         required
                                         value={checkIn}
                                         onChange={(e) => setCheckIn(e.target.value)}
                                         className={inputStyles}
+                                        aria-required="true"
                                     />
                                     <input
                                         type="date"
@@ -183,19 +225,22 @@ export default function BookingPage() {
                                         value={checkOut}
                                         onChange={(e) => setCheckOut(e.target.value)}
                                         className={inputStyles}
+                                        aria-required="true"
+                                        min={checkIn}
                                     />
                                     <input
                                         type="number"
                                         required
                                         min="1"
+                                        name="guests"
                                         placeholder="Number of Guests"
                                         value={guests}
                                         onChange={(e) => setGuests(Number(e.target.value))}
                                         className={inputStyles}
+                                        aria-required="true"
                                     />
                                 </div>
 
-                                {/* Booking Estimate */}
                                 {checkIn && checkOut && guests > 0 && (
                                     <div className="mt-4 text-gray-800">
                                         {(() => {
@@ -205,16 +250,20 @@ export default function BookingPage() {
 
                                             return (
                                                 <p className="text-lg font-medium">
-                                                    Estimated Total: ${total.toLocaleString()} ({guests} guest{guests > 1 ? "s" : ""},{" "}
-                                                    {nights} night{nights > 1 ? "s" : ""})
+                                                    Estimated Total: $
+                                                    {total.toLocaleString(undefined, {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2,
+                                                    })}{" "}
+                                                    ({guests} guest{guests > 1 ? "s" : ""}, {nights} night{nights > 1 ? "s" : ""})
                                                 </p>
                                             );
                                         })()}
                                     </div>
                                 )}
 
-                                <button type="submit" className={buttonStyles}>
-                                    Submit Booking
+                                <button type="submit" className={buttonStyles} disabled={loading || !isValidBooking()}>
+                                    {loading ? "Submitting..." : "Submit Booking"}
                                 </button>
                             </form>
                         </div>

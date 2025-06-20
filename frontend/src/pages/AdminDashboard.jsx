@@ -12,7 +12,7 @@ export default function AdminDashboard() {
     const [roomModalOpen, setRoomModalOpen] = useState(false);
     const navigate = useNavigate();
 
-    // Check for admin token and fetch data
+    // Check token and fetch data on mount
     useEffect(() => {
         const token = localStorage.getItem("adminToken");
         if (!token) {
@@ -20,14 +20,19 @@ export default function AdminDashboard() {
         } else {
             fetchDashboardData(token);
         }
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [navigate]);
 
-    // Fetch bookings and rooms
+    // Fetch bookings and rooms data
     const fetchDashboardData = async (token) => {
         try {
             const [bookingsRes, roomsRes] = await Promise.all([
-                axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/bookings`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/rooms`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/bookings`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                }),
+                axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/rooms`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                }),
             ]);
             setBookings(bookingsRes.data);
             setRooms(roomsRes.data);
@@ -37,7 +42,7 @@ export default function AdminDashboard() {
         }
     };
 
-    // Handle booking edit
+    // Prepare booking for editing
     const handleEdit = (booking) => {
         setEditingBooking({
             ...booking,
@@ -48,10 +53,11 @@ export default function AdminDashboard() {
         setEditModalOpen(true);
     };
 
-    // Submit edited booking
+    // Submit booking edits
     const handleEditSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem("adminToken");
+        if (!token) return navigate("/admin-login");
 
         try {
             await axios.put(
@@ -81,12 +87,15 @@ export default function AdminDashboard() {
             setEditingBooking(null);
         } catch (err) {
             console.error("Edit failed:", err);
+            alert("Failed to update booking.");
         }
     };
 
     // Delete a booking
     const handleDelete = async (booking) => {
         const token = localStorage.getItem("adminToken");
+        if (!token) return navigate("/admin-login");
+
         if (!window.confirm("Are you sure you want to delete this booking?")) return;
 
         try {
@@ -104,12 +113,15 @@ export default function AdminDashboard() {
             );
         } catch (err) {
             console.error("Delete failed:", err);
+            alert("Failed to delete booking.");
         }
     };
 
     // Delete a room
     const handleDeleteRoom = async (id) => {
         const token = localStorage.getItem("adminToken");
+        if (!token) return navigate("/admin-login");
+
         if (!window.confirm("Delete this room?")) return;
 
         try {
@@ -162,6 +174,7 @@ export default function AdminDashboard() {
                         setRoomModalOpen(true);
                     }}
                     className="mt-6 flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-black font-medium px-5 py-2.5 rounded-2xl shadow transition duration-200"
+                    aria-label="Add new room"
                 >
                     <span className="text-lg">+</span>
                     <span>Add Room</span>
@@ -218,7 +231,8 @@ export default function AdminDashboard() {
                     <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 relative">
                         <button
                             onClick={() => setRoomModalOpen(false)}
-                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-3xl leading-none"
+                            aria-label="Close room form"
                         >
                             ×
                         </button>
@@ -237,7 +251,11 @@ export default function AdminDashboard() {
             {/* Booking Edit Modal */}
             {editModalOpen && editingBooking && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-                    <form onSubmit={handleEditSubmit} className="bg-white p-6 rounded shadow-md w-full max-w-md">
+                    <form
+                        onSubmit={handleEditSubmit}
+                        className="bg-white p-6 rounded shadow-md w-full max-w-md"
+                        aria-label="Edit booking form"
+                    >
                         <h2 className="text-xl font-semibold mb-4">Edit Booking</h2>
 
                         <label className="block mb-2">
@@ -247,6 +265,7 @@ export default function AdminDashboard() {
                                 className="w-full p-2 border rounded"
                                 value={editingBooking.checkIn}
                                 onChange={(e) => setEditingBooking({ ...editingBooking, checkIn: e.target.value })}
+                                required
                             />
                         </label>
 
@@ -257,6 +276,7 @@ export default function AdminDashboard() {
                                 className="w-full p-2 border rounded"
                                 value={editingBooking.checkOut}
                                 onChange={(e) => setEditingBooking({ ...editingBooking, checkOut: e.target.value })}
+                                required
                             />
                         </label>
 
@@ -267,7 +287,8 @@ export default function AdminDashboard() {
                                 min="1"
                                 className="w-full p-2 border rounded"
                                 value={editingBooking.guests}
-                                onChange={(e) => setEditingBooking({ ...editingBooking, guests: parseInt(e.target.value) })}
+                                onChange={(e) => setEditingBooking({ ...editingBooking, guests: parseInt(e.target.value) || 1 })}
+                                required
                             />
                         </label>
 
