@@ -60,7 +60,7 @@ export default function AdminDashboard() {
         if (!token) return navigate("/admin-login");
 
         try {
-            await axios.put(
+            const response = await axios.put(
                 `${import.meta.env.VITE_API_BASE_URL}/api/admin/bookings`,
                 {
                     guest_id: editingBooking.guest_id,
@@ -69,16 +69,27 @@ export default function AdminDashboard() {
                     checkIn: editingBooking.checkIn,
                     checkOut: editingBooking.checkOut,
                     num_guests: editingBooking.guests,
+                    newGuestInfo: {
+                        fullName: editingBooking.fullName,
+                        email: editingBooking.email,
+                    },
+                    newRoomId: editingBooking.newRoomId,
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+
+            const { totalPrice } = response.data;
 
             setBookings((prev) =>
                 prev.map((b) =>
                     b.guest_id === editingBooking.guest_id &&
                     b.room_id === editingBooking.room_id &&
                     b.checkIn === editingBooking.originalCheckIn
-                        ? { ...editingBooking }
+                        ? {
+                              ...editingBooking,
+                              totalPrice,
+                              checkIn: editingBooking.checkIn,
+                          }
                         : b
                 )
             );
@@ -253,12 +264,53 @@ export default function AdminDashboard() {
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
                     <form
                         onSubmit={handleEditSubmit}
-                        className="bg-white p-6 rounded shadow-md w-full max-w-md"
+                        className="bg-white p-6 rounded shadow-md w-full max-w-md space-y-4"
                         aria-label="Edit booking form"
                     >
-                        <h2 className="text-xl font-semibold mb-4">Edit Booking</h2>
+                        <h2 className="text-xl font-semibold">Edit Booking</h2>
 
-                        <label className="block mb-2">
+                        <label>
+                            Full Name:
+                            <input
+                                type="text"
+                                className="w-full p-2 border rounded"
+                                value={editingBooking.fullName || ""}
+                                onChange={(e) => setEditingBooking({ ...editingBooking, fullName: e.target.value })}
+                            />
+                        </label>
+
+                        <label>
+                            Email:
+                            <input
+                                type="email"
+                                className="w-full p-2 border rounded"
+                                value={editingBooking.email || ""}
+                                onChange={(e) => setEditingBooking({ ...editingBooking, email: e.target.value })}
+                            />
+                        </label>
+
+                        <label>
+                            Room:
+                            <select
+                                className="w-full p-2 border rounded"
+                                value={editingBooking.room_id}
+                                onChange={(e) =>
+                                    setEditingBooking({
+                                        ...editingBooking,
+                                        newRoomId: parseInt(e.target.value),
+                                        room_id: parseInt(e.target.value),
+                                    })
+                                }
+                            >
+                                {rooms.map((room) => (
+                                    <option key={room.id} value={room.id}>
+                                        {room.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+
+                        <label>
                             Check-in:
                             <input
                                 type="date"
@@ -269,7 +321,7 @@ export default function AdminDashboard() {
                             />
                         </label>
 
-                        <label className="block mb-2">
+                        <label>
                             Check-out:
                             <input
                                 type="date"
@@ -280,14 +332,19 @@ export default function AdminDashboard() {
                             />
                         </label>
 
-                        <label className="block mb-4">
+                        <label>
                             Guests:
                             <input
                                 type="number"
                                 min="1"
                                 className="w-full p-2 border rounded"
                                 value={editingBooking.guests}
-                                onChange={(e) => setEditingBooking({ ...editingBooking, guests: parseInt(e.target.value) || 1 })}
+                                onChange={(e) =>
+                                    setEditingBooking({
+                                        ...editingBooking,
+                                        guests: parseInt(e.target.value) || 1,
+                                    })
+                                }
                                 required
                             />
                         </label>

@@ -120,32 +120,72 @@ export const getDashboardBookings = async (req, res) => {
 };
 
 export const updateBookingByCompositeKey = async (req, res) => {
-    const { guest_id, room_id, originalCheckIn, checkIn, checkOut, num_guests } = req.body;
+    const {
+        guest_id,
+        room_id, // original room ID
+        originalCheckIn,
+        checkIn,
+        checkOut,
+        num_guests,
+        newGuestInfo, // { fullName, email }
+        newRoomId, // if changed
+    } = req.body;
 
-    const formatDate = (dateString) => {
-        return new Date(dateString).toISOString().split("T")[0];
-    };
+    const formatDate = (dateString) => new Date(dateString).toISOString().split("T")[0];
 
     const formattedOriginalCheckIn = formatDate(originalCheckIn);
     const formattedCheckIn = formatDate(checkIn);
     const formattedCheckOut = formatDate(checkOut);
+    const roomToUse = newRoomId || room_id;
 
     try {
-        const [result] = await db.query(
+        // 1. Get room price
+        const [roomResult] = await db.query(`SELECT price_per_night FROM rooms WHERE id = ?`, [roomToUse]);
+
+        if (!roomResult.length) {
+            return res.status(404).json({ success: false, message: "Room not found" });
+        }
+
+        const pricePerNight = roomResult[0].price_per_night;
+        const nights = (new Date(formattedCheckOut) - new Date(formattedCheckIn)) / (1000 * 60 * 60 * 24);
+        const totalPrice = pricePerNight * nights;
+
+        // 2. Update booking
+        const [updateResult] = await db.query(
             `UPDATE bookings
-             SET check_in = ?, check_out = ?, num_guests = ?
+             SET check_in = ?, check_out = ?, num_guests = ?, room_id = ?, total_price = ?
              WHERE guest_id = ? AND room_id = ? AND check_in = ?`,
-            [formattedCheckIn, formattedCheckOut, num_guests, guest_id, room_id, formattedOriginalCheckIn]
+            [formattedCheckIn, formattedCheckOut, num_guests, roomToUse, totalPrice, guest_id, room_id, formattedOriginalCheckIn]
         );
 
-        if (result.affectedRows === 0) {
+        if (updateResult.affectedRows === 0) {
             return res.status(404).json({ success: false, message: "Booking not found" });
         }
 
-        res.json({ success: true, message: "Booking updated." });
+        // 3. Update guest info if provided
+        if (newGuestInfo) {
+            const updates = [];
+            const params = [];
+
+            if (newGuestInfo.fullName) {
+                updates.push("fullName = ?");
+                params.push(newGuestInfo.fullName);
+            }
+            if (newGuestInfo.email) {
+                updates.push("email = ?");
+                params.push(newGuestInfo.email);
+            }
+
+            if (updates.length > 0) {
+                params.push(guest_id);
+                await db.query(`UPDATE guests SET ${updates.join(", ")} WHERE id = ?`, params);
+            }
+        }
+
+        res.json({ success: true, message: "Booking and guest updated", totalPrice });
     } catch (err) {
-        console.error("Error updating booking:", err);
-        res.status(500).json({ error: "Update failed" });
+        console.error("Update failed:", err);
+        res.status(500).json({ error: "Internal server error" });
     }
 };
 
