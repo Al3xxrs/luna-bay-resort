@@ -127,7 +127,7 @@ export const updateBookingByCompositeKey = async (req, res) => {
         checkIn,
         checkOut,
         num_guests,
-        newGuestInfo, // { fullName, email }
+        newGuestInfo, // { full_name, email }
         newRoomId, // if changed
     } = req.body;
 
@@ -168,7 +168,7 @@ export const updateBookingByCompositeKey = async (req, res) => {
             const params = [];
 
             if (newGuestInfo.fullName) {
-                updates.push("fullName = ?");
+                updates.push("full_name = ?");
                 params.push(newGuestInfo.fullName);
             }
             if (newGuestInfo.email) {
