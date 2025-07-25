@@ -55,12 +55,11 @@ luna-bay-resort/
 
 ## ⚙️ Tech Stack
 
-| Layer    | Technologies                                    |
-| -------- | ----------------------------------------------- |
-| Frontend | React, Vite, Tailwind CSS                       |
-| Backend  | Node.js, Express, JWT, Nodemailer, Multer       |
-| Database | MySQL                                           |
-| Hosting  | Vercel (Frontend), Railway (Backend), Aiven(DB) |
+| Layer    | Technologies                              |
+| -------- | ----------------------------------------- |
+| Frontend | React, Vite, Tailwind CSS                 |
+| Backend  | Node.js, Express, JWT, Nodemailer, Multer |
+| Database | MySQL                                     |
 
 ---
 
@@ -124,15 +123,6 @@ npm start
 cd ../frontend
 npm run dev
 ```
-
----
-
-## 🌐 Deployment
-
--   **Frontend:** Vercel (auto-deploys from `/frontend`)
--   **Backend:** Railway
--   **Database:** Aiven
--   Ensure the frontend's `vite.config.js` proxies API requests to the backend URL in production.
 
 ---
 
